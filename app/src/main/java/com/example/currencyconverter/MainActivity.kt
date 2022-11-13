@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -22,12 +23,6 @@ class MainActivity : AppCompatActivity() {
     var toCurrency = "USD"
     var positionTo = 1
     var conversionRate = 0f
-    var conversionRate_eurusd =  1.0354f
-    var conversionRate_sekusd = 0.09636f
-    var conversionRate_gbpusd = 1.18426f
-    var conversionRate_cnyusd = 0.14068f
-    var conversionRate_jpyusd = 0.0072f
-    var conversionRate_krwusd = 0.00076f
 
 
     lateinit var binding: ActivityMainBinding
@@ -38,19 +33,22 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
         setupSpinner()
+
         //add listener to input edit text
         binding.editFromConversion.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
+                Log.d("Main", "After Text Changed")
                 convertCurrency()
             }
-
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                TODO("Not yet implemented")
+                Log.d("Main", "Before Text Changed")
             }
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                Log.d("Main", "On Text Changed")
                 convertCurrency()
             }
         })
+
         //add listener to button to swap currencies
         binding.swap.setOnClickListener {
             swapFunction()
@@ -64,19 +62,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     //control the toolbar, used to change from one page to the other one
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (item.itemId == R.id.action_converter) {
-            //todo: it does nothing because you are already in the page
-            Toast.makeText(this, "Converter Clicked", Toast.LENGTH_LONG).show()
-            return true
-        }
-        else if (item.itemId == R.id.action_ratesList) {
-            val intent = Intent(this@MainActivity,ConversionRatesList::class.java)
-            startActivity(intent)
-            Toast.makeText(this, "Info Clicked", Toast.LENGTH_LONG).show()
-            return true
-        }
-        return super.onOptionsItemSelected(item)
+    override fun onOptionsItemSelected(item: MenuItem) =  when (item.itemId) {
+            R.id.action_ratesList -> {
+                val intent = Intent(this@MainActivity, ConversionRatesList::class.java)
+                startActivity(intent)
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
     }
 
     //set up spinner of currencies
@@ -125,77 +117,89 @@ class MainActivity : AppCompatActivity() {
 
     //manuel currency convertor
     private fun conversionRates(){
+        val conversionRate_eurusd =  1.0354f
+        val conversionRate_sekusd = 0.09636f
+        val conversionRate_gbpusd = 1.18426f
+        val conversionRate_cnyusd = 0.14068f
+        val conversionRate_jpyusd = 0.0072f
+        val conversionRate_krwusd = 0.00076f
         when (fromCurrency){
-            "EUR" -> when (toCurrency){
-                "SEK" -> conversionRate = conversionRate_eurusd/conversionRate_sekusd
-                "GBP" -> conversionRate = conversionRate_eurusd/conversionRate_gbpusd
-                "USD" -> conversionRate = conversionRate_eurusd
-                "CNY" -> conversionRate = conversionRate_eurusd/conversionRate_cnyusd
-                "JPY" -> conversionRate = conversionRate_eurusd/conversionRate_jpyusd
-                "KRW" -> conversionRate = conversionRate_eurusd/conversionRate_krwusd
+            "EUR" -> conversionRate = when (toCurrency){
+                "SEK" -> conversionRate_eurusd/conversionRate_sekusd
+                "GBP" -> conversionRate_eurusd/conversionRate_gbpusd
+                "USD" -> conversionRate_eurusd
+                "CNY" -> conversionRate_eurusd/conversionRate_cnyusd
+                "JPY" -> conversionRate_eurusd/conversionRate_jpyusd
+                "KRW" -> conversionRate_eurusd/conversionRate_krwusd
+                else -> 0f
             }
-            "SEK" -> when (toCurrency){
-                "EUR" -> conversionRate = conversionRate_sekusd/conversionRate_eurusd
-                "GBP" -> conversionRate = conversionRate_sekusd/conversionRate_gbpusd
-                "USD" -> conversionRate = conversionRate_sekusd
-                "CNY" -> conversionRate = conversionRate_sekusd/conversionRate_cnyusd
-                "JPY" -> conversionRate = conversionRate_sekusd/conversionRate_jpyusd
-                "KRW" -> conversionRate = conversionRate_sekusd/conversionRate_krwusd
-            }
-
-            "GBP" -> when (toCurrency){
-                "EUR" -> conversionRate = conversionRate_gbpusd/conversionRate_eurusd
-                "SEK" -> conversionRate = conversionRate_gbpusd/conversionRate_sekusd
-                "USD" -> conversionRate = conversionRate_gbpusd
-                "CNY" -> conversionRate = conversionRate_gbpusd/conversionRate_cnyusd
-                "JPY" -> conversionRate = conversionRate_gbpusd/conversionRate_jpyusd
-                "KRW" -> conversionRate = conversionRate_gbpusd/conversionRate_krwusd
+            "SEK" -> conversionRate = when (toCurrency){
+                "EUR" -> conversionRate_sekusd/conversionRate_eurusd
+                "GBP" -> conversionRate_sekusd/conversionRate_gbpusd
+                "USD" -> conversionRate_sekusd
+                "CNY" -> conversionRate_sekusd/conversionRate_cnyusd
+                "JPY" -> conversionRate_sekusd/conversionRate_jpyusd
+                "KRW" -> conversionRate_sekusd/conversionRate_krwusd
+                else -> 0f
             }
 
-            "USD" -> when (toCurrency){
-                "EUR" -> conversionRate = 1/conversionRate_eurusd
-                "SEK" -> conversionRate = 1/conversionRate_sekusd
-                "GBP" -> conversionRate = 1/conversionRate_gbpusd
-                "CNY" -> conversionRate = 1/conversionRate_cnyusd
-                "JPY" -> conversionRate = 1/conversionRate_jpyusd
-                "KRW" -> conversionRate = 1/conversionRate_krwusd
+            "GBP" -> conversionRate = when (toCurrency){
+                "EUR" -> conversionRate_gbpusd/conversionRate_eurusd
+                "SEK" -> conversionRate_gbpusd/conversionRate_sekusd
+                "USD" -> conversionRate_gbpusd
+                "CNY" -> conversionRate_gbpusd/conversionRate_cnyusd
+                "JPY" -> conversionRate_gbpusd/conversionRate_jpyusd
+                "KRW" -> conversionRate_gbpusd/conversionRate_krwusd
+                else -> 0f
             }
 
-            "CNY" -> when (toCurrency){
-                "EUR" -> conversionRate = conversionRate_cnyusd/conversionRate_eurusd
-                "SEK" -> conversionRate = conversionRate_cnyusd/conversionRate_sekusd
-                "USD" -> conversionRate = conversionRate_cnyusd
-                "GBP" -> conversionRate = conversionRate_cnyusd/conversionRate_gbpusd
-                "JPY" -> conversionRate = conversionRate_cnyusd/conversionRate_jpyusd
-                "KRW" -> conversionRate = conversionRate_cnyusd/conversionRate_krwusd
+            "USD" -> conversionRate = when (toCurrency){
+                "EUR" -> 1/conversionRate_eurusd
+                "SEK" -> 1/conversionRate_sekusd
+                "GBP" -> 1/conversionRate_gbpusd
+                "CNY" -> 1/conversionRate_cnyusd
+                "JPY" -> 1/conversionRate_jpyusd
+                "KRW" -> 1/conversionRate_krwusd
+                else -> 0f
             }
 
-            "JPY" -> when (toCurrency){
-                "SEK" -> conversionRate = conversionRate_jpyusd/conversionRate_sekusd
-                "GBP" -> conversionRate = conversionRate_jpyusd/conversionRate_gbpusd
-                "USD" -> conversionRate = conversionRate_jpyusd
-                "CNY" -> conversionRate = conversionRate_jpyusd/conversionRate_cnyusd
-                "EUR" -> conversionRate = conversionRate_jpyusd/conversionRate_eurusd
-                "KRW" -> conversionRate = conversionRate_jpyusd/conversionRate_krwusd
+            "CNY" -> conversionRate = when (toCurrency){
+                "EUR" -> conversionRate_cnyusd/conversionRate_eurusd
+                "SEK" -> conversionRate_cnyusd/conversionRate_sekusd
+                "USD" -> conversionRate_cnyusd
+                "GBP" -> conversionRate_cnyusd/conversionRate_gbpusd
+                "JPY" -> conversionRate_cnyusd/conversionRate_jpyusd
+                "KRW" -> conversionRate_cnyusd/conversionRate_krwusd
+                else -> 0f
             }
 
-            "KRW" -> when (toCurrency){
-                "SEK" -> conversionRate = conversionRate_krwusd/conversionRate_sekusd
-                "GBP" -> conversionRate = conversionRate_krwusd/conversionRate_gbpusd
-                "USD" -> conversionRate = conversionRate_krwusd
-                "CNY" -> conversionRate = conversionRate_krwusd/conversionRate_cnyusd
-                "JPY" -> conversionRate = conversionRate_krwusd/conversionRate_jpyusd
-                "EUR" -> conversionRate = conversionRate_krwusd/conversionRate_eurusd
+            "JPY" -> conversionRate = when (toCurrency){
+                "SEK" -> conversionRate_jpyusd/conversionRate_sekusd
+                "GBP" -> conversionRate_jpyusd/conversionRate_gbpusd
+                "USD" -> conversionRate_jpyusd
+                "CNY" -> conversionRate_jpyusd/conversionRate_cnyusd
+                "EUR" -> conversionRate_jpyusd/conversionRate_eurusd
+                "KRW" -> conversionRate_jpyusd/conversionRate_krwusd
+                else -> 0f
             }
+
+            "KRW" -> conversionRate = when (toCurrency){
+                "SEK" -> conversionRate_krwusd/conversionRate_sekusd
+                "GBP" -> conversionRate_krwusd/conversionRate_gbpusd
+                "USD" -> conversionRate_krwusd
+                "CNY" -> conversionRate_krwusd/conversionRate_cnyusd
+                "JPY" -> conversionRate_krwusd/conversionRate_jpyusd
+                "EUR" -> conversionRate_krwusd/conversionRate_eurusd
+                else -> 0f
+            }
+            else -> conversionRate = 0f
         }
     }
 
-    //TODO: IT DOES NOT WORK, IT NEEDS TO BE FIXED
+    //swaps from and to
     private fun swapFunction(){
-
         val spinnerFrom: Spinner = binding.spinnerFromConversion
         val spinnerTo: Spinner = binding.spinnerToConversion
-
         ArrayAdapter.createFromResource(
             this,
             R.array.currencies,
@@ -205,15 +209,14 @@ class MainActivity : AppCompatActivity() {
             spinnerFrom.adapter = adapter
             spinnerTo.adapter = adapter
         }
-        //don't know how to set the parent of the spinner
-        spinnerTo.parent?.bringChildToFront(spinnerFrom.getChildAt(positionFrom))
-        spinnerFrom.parent?.bringChildToFront(spinnerFrom.getChildAt(positionTo))
-
+        spinnerFrom.setSelection(positionTo)
+        spinnerTo.setSelection(positionFrom)
     }
 
     //converts and shows converted value
     private fun convertCurrency() {
         conversionRates()
+
         if (binding.editFromConversion.text.isNotEmpty() && binding.editFromConversion.text.isNotBlank()) {
             if (fromCurrency == toCurrency) {
                 binding.editToConversion.setText(binding.editFromConversion.text.toString())
@@ -227,6 +230,7 @@ class MainActivity : AppCompatActivity() {
                 binding.editToConversion.setText(text)
             }
         }
+
     }
 
 

@@ -4,6 +4,7 @@
     <string name="from">From</string>
     <string name="converter">Converter</string>
     <string name="rates_list">Rates List</string>
+    <string name="ConversionRatesList" />
 
     <string-array name="currencies">
         <item>EUR</item>
