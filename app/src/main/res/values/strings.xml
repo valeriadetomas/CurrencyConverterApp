@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">CurrencyConverter</string>
+    <string name="to">To</string>
+    <string name="from">From</string>
+    <string name="converter">Converter</string>
+    <string name="rates_list">Rates List</string>
+
+    <string-array name="currencies">
+        <item>EUR</item>
+        <item>SEK</item>
+        <item>USD</item>
+        <item>GBP</item>
+        <item>CNY</item>
+        <item>JPY</item>
+        <item>KRW</item>
+    </string-array>
+
+
+</resources>
