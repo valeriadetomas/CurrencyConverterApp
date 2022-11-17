@@ -55,6 +55,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    data class Currency(val image: Int,
+                    val description: String)
+
     //adds items to the action bar
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu, menu)
