@@ -223,18 +223,10 @@ class MainActivity : AppCompatActivity() {
         if (binding.editFromConversion.text.isNotEmpty() && binding.editFromConversion.text.isNotBlank()) {
             if (fromCurrency == toCurrency) {
                 binding.editToConversion.setText(binding.editFromConversion.text.toString())
-                Toast.makeText(
-                    applicationContext,
-                    "Pick two different currencies",
-                    Toast.LENGTH_SHORT
-                ).show()
             } else {
                 val text = (binding.editFromConversion.text.toString().toFloat() * conversionRate).toString()
                 binding.editToConversion.setText(text)
             }
         }
-
     }
-
-
 }
