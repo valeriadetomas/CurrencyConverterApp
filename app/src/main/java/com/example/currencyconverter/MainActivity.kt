@@ -44,16 +44,16 @@ class MainActivity : AppCompatActivity() {
     var resultRates: WorldCurrency? = null
 
     lateinit var fusedLocationProviderClient: FusedLocationProviderClient
-    // LocationRequest - Requirements for the location updates
+    // LocationRequest - setters location updates
     private lateinit var locationRequest: LocationRequest
-    // LocationCallback - Called when FusedLocationProviderClient has a new Location.
+    // LocationCallback - it is called when fused location has a new location
     var locationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
             super.onLocationResult(locationResult)
             currentLocation = locationResult.lastLocation
         }
     }
-
+    //when the second page comes back to the main one this one is called
     var resultLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
@@ -111,6 +111,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     //control the toolbar, used to change from one page to the other one
+    //it passes the list of currencies and the rates, which are the data got from the api
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
         R.id.action_ratesList -> {
             val intent = Intent(this@MainActivity, ConversionRatesList::class.java)
@@ -122,7 +123,7 @@ class MainActivity : AppCompatActivity() {
         else -> super.onOptionsItemSelected(item)
     }
 
-    //set up spinner of currencies
+    //set up button of change currencies
     private fun setupButton() {
 
         val buttonFrom: Button = binding.fromButton
@@ -131,7 +132,6 @@ class MainActivity : AppCompatActivity() {
         buttonFrom.text = fromCurrency
         buttonTo.text = toCurrency
 
-        //add listener to button to swap currencies
         binding.fromButton.setOnClickListener {
             val intent = Intent(this@MainActivity, ListOfCurrencies::class.java)
             intent.putExtra("currencies", listCurrency)
@@ -169,6 +169,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    //call to API through Retrofit, aunches coroutine to get the data
     private fun APICalls() {
         val ratesApi = RetrofitHelper.getInstance().create(RatesApi::class.java)
         // launching a new coroutine
@@ -183,7 +184,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
+    //gets the selection of the currency from intent
     private fun getSelection(data: Intent?) {
         val fromButton: Button = binding.fromButton
         val toButton: Button = binding.toButton
@@ -203,15 +204,17 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    //adds localization fucntionality, which lets us retrieve the current location fo the device
     private fun locationFunctionality(){
-        if(
-            ActivityCompat.checkSelfPermission(this,android.Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
-            ActivityCompat.checkSelfPermission(this,android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-        ) {
-            var locationManager: LocationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        //checks if location permissions are granted
+        if(ActivityCompat.checkSelfPermission(this,android.Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
+            ActivityCompat.checkSelfPermission(this,android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+
+            //initializes the location manager
+            val locationManager: LocationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
             if(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
-
+                //gets the last location
                 val loc: Task<Location> = fusedLocationProviderClient.getLastLocation()
 
                 loc.addOnSuccessListener { location ->
@@ -229,7 +232,6 @@ class MainActivity : AppCompatActivity() {
                                                             else java.text.NumberFormat.getCurrencyInstance(address.locale).currency.toString()
 
                                             binding.fromButton.text = fromCurrency
-
                                     }
                                 }
                         }
@@ -241,8 +243,6 @@ class MainActivity : AppCompatActivity() {
                                 .setMaxUpdateDelayMillis(1000)
                                 .build()
 
-                        fusedLocationProviderClient =
-                            LocationServices.getFusedLocationProviderClient(this)
                         fusedLocationProviderClient.requestLocationUpdates(
                             locationRequest,
                             locationCallback,

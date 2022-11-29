@@ -65,7 +65,7 @@ class ConversionRatesList : AppCompatActivity() {
 
         while (i < listOfCurrencies.size){
             conversionRate = rates.get(i)/rates.get(position)
-            conversions.add(conversionRate.toString() + listOfCurrencies.get(i).toString())
+            conversions.add(conversionRate.toString() + " " + listOfCurrencies.get(i).toString())
             i++
         }
 
