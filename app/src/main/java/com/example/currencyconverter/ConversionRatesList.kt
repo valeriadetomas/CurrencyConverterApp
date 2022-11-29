@@ -22,12 +22,6 @@ class ConversionRatesList : AppCompatActivity() {
     var conversions: ArrayList<String> = arrayListOf("1 EUR")
     var listOfCurrencies: ArrayList<String> = arrayListOf("EUR", "GBP", "USD")
     var rates: FloatArray = floatArrayOf(2.2f, 2.4f)
-    var conversionOne = "1 SEK"
-    var conversionTwo = "1 USD"
-    var conversionThree = "1 GBP"
-    var conversionFour = "1 CNY"
-    var conversionFive = "1 JPY"
-    var conversionSix = "1 KRW"
 
     var resultLauncherFromRatesList = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
@@ -48,7 +42,6 @@ class ConversionRatesList : AppCompatActivity() {
         listOfCurrencies = intent.getStringArrayListExtra("currencies")!!
 
         setupButton()
-
     }
 
     private fun getSelectionRates(data: Intent?){
@@ -61,7 +54,6 @@ class ConversionRatesList : AppCompatActivity() {
             }
             setRatesList()
         }
-
     }
 
     //set up the list
@@ -69,17 +61,16 @@ class ConversionRatesList : AppCompatActivity() {
         val position = listOfCurrencies.indexOf(selectedCurrency)
         var i = 0
         var conversionRate: Float
-        conversions.removeAll(conversions)
+        conversions.removeAll(conversions.toSet())
+
         while (i < listOfCurrencies.size){
             conversionRate = rates.get(i)/rates.get(position)
             conversions.add(conversionRate.toString() + listOfCurrencies.get(i).toString())
             i++
         }
-        //all the currencies with the correspondent rate except for the one selected are part of this array
 
         // access the listView
         val listView = binding.ratesList
-
         listView.adapter  = ArrayAdapter(this,
             R.layout.aligned_right, conversions)
         listView.isScrollbarFadingEnabled = false
@@ -95,7 +86,6 @@ class ConversionRatesList : AppCompatActivity() {
 
         //add listener to button to select currency
         binding.ratesButton.setOnClickListener {
-
             val intent = Intent(this@ConversionRatesList, ListOfCurrencies::class.java)
             intent.putExtra("where", "rates")
             intent.putExtra("currencies", listOfCurrencies)
