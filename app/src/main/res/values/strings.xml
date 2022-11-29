@@ -5,6 +5,7 @@
     <string name="converter">Converter</string>
     <string name="rates_list">Rates List</string>
     <string name="ConversionRatesList" />
+    <string name="conversion_rates">CONVERSION RATES</string>
 
     <string-array name="currencies">
         <item>EUR</item>

@@ -1,17 +1,27 @@
 package com.example.currencyconverter
 
+import android.app.Activity
+import android.content.Intent
+import android.content.res.Configuration
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import android.widget.ListView
+import android.widget.Button
 import android.widget.Spinner
+import androidx.activity.result.contract.ActivityResultContracts
 import com.example.currencyconverter.databinding.ActivityConversionRatesListBinding
+import java.text.NumberFormat
+import java.util.*
+import kotlin.collections.ArrayList
 
 class ConversionRatesList : AppCompatActivity() {
     lateinit var binding: ActivityConversionRatesListBinding
     var selectedCurrency = "EUR"
+    var conversions: ArrayList<String> = arrayListOf("1 EUR")
+    var listOfCurrencies: ArrayList<String> = arrayListOf("EUR", "GBP", "USD")
+    var rates: FloatArray = floatArrayOf(2.2f, 2.4f)
     var conversionOne = "1 SEK"
     var conversionTwo = "1 USD"
     var conversionThree = "1 GBP"
@@ -19,7 +29,12 @@ class ConversionRatesList : AppCompatActivity() {
     var conversionFive = "1 JPY"
     var conversionSix = "1 KRW"
 
-
+    var resultLauncherFromRatesList = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val data: Intent? = result.data
+            getSelectionRates(data)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,120 +44,62 @@ class ConversionRatesList : AppCompatActivity() {
         //enable home button
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        setupSpinner()
+        rates = intent.getFloatArrayExtra("rates")!!
+        listOfCurrencies = intent.getStringArrayListExtra("currencies")!!
+
+        setupButton()
+
+    }
+
+    private fun getSelectionRates(data: Intent?){
+        val ratesButton: Button = binding.ratesButton
+
+        if (data != null) {
+            if (data.getStringExtra("selected") != null) {
+                selectedCurrency = data.getStringExtra("selected").toString()
+                ratesButton.text = selectedCurrency
+            }
+            setRatesList()
+        }
 
     }
 
     //set up the list
     private fun setRatesList(){
-        conversionRatesToString()
+        val position = listOfCurrencies.indexOf(selectedCurrency)
+        var i = 0
+        var conversionRate: Float
+        conversions.removeAll(conversions)
+        while (i < listOfCurrencies.size){
+            conversionRate = rates.get(i)/rates.get(position)
+            conversions.add(conversionRate.toString() + listOfCurrencies.get(i).toString())
+            i++
+        }
         //all the currencies with the correspondent rate except for the one selected are part of this array
-        val conversionRates = arrayOf(
-            conversionOne, conversionTwo, conversionThree,
-            conversionFour, conversionFive, conversionSix
-        )
+
         // access the listView
-        var listView = binding.ratesList
+        val listView = binding.ratesList
 
         listView.adapter  = ArrayAdapter(this,
-            R.layout.aligned_right, conversionRates)
+            R.layout.aligned_right, conversions)
+        listView.isScrollbarFadingEnabled = false
     }
 
-    private fun setupSpinner(){
-        val spinnerList: Spinner = binding.spinnerListRates
-        ArrayAdapter.createFromResource(
-            this,
-            R.array.currencies,
-            android.R.layout.simple_spinner_item
-        ).also { adapter ->
-            adapter.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line)
-            spinnerList.adapter = adapter
-        }
-        spinnerList.onItemSelectedListener = (object : AdapterView.OnItemSelectedListener {
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-            }
-            override fun onItemSelected(
-                parent: AdapterView<*>?,
-                view: View?,
-                position: Int,
-                id: Long
-            ) {
-                selectedCurrency = parent?.getItemAtPosition(position).toString()
-                setRatesList()
-            }
-        })
-    }
+    private fun setupButton() {
+        var locale: Locale = Locale.getDefault()
+        selectedCurrency = NumberFormat.getCurrencyInstance(locale).currency.toString()
 
-    private fun conversionRatesToString(){
-        val conversionRate_eurusd =  1.0354f
-        val conversionRate_sekusd = 0.09636f
-        val conversionRate_gbpusd = 1.18426f
-        val conversionRate_cnyusd = 0.14068f
-        val conversionRate_jpyusd = 0.0072f
-        val conversionRate_krwusd = 0.00076f
-        when (selectedCurrency){
-            "EUR" -> {
-                conversionOne = (conversionRate_eurusd/conversionRate_sekusd).toString() + "  SEK"
-                conversionTwo = (conversionRate_eurusd/conversionRate_gbpusd).toString() + "  GBP"
-                conversionThree = "$conversionRate_eurusd  USD"
-                conversionFour = (conversionRate_eurusd/conversionRate_cnyusd).toString() + "  CNY"
-                conversionFive = (conversionRate_eurusd/conversionRate_jpyusd).toString() + "  JPY"
-                conversionSix = (conversionRate_eurusd/conversionRate_krwusd).toString() + "  KRW"
-            }
-            "SEK" -> {
-                conversionOne = (conversionRate_sekusd/conversionRate_eurusd).toString() + "  EUR"
-                conversionTwo = (conversionRate_sekusd/conversionRate_gbpusd).toString() + "  GBP"
-                conversionThree = "$conversionRate_sekusd  USD"
-                conversionFour = (conversionRate_sekusd/conversionRate_cnyusd).toString() + "  CNY"
-                conversionFive = (conversionRate_sekusd/conversionRate_jpyusd).toString() + "  JPY"
-                conversionSix = (conversionRate_sekusd/conversionRate_krwusd).toString() + "  KRW"
-            }
+        val buttonRates: Button = binding.ratesButton
 
-            "GBP" -> {
-                conversionOne = (conversionRate_gbpusd/conversionRate_eurusd).toString() + "  EUR"
-                conversionTwo = (conversionRate_gbpusd/conversionRate_sekusd).toString() + "  SEK"
-                conversionThree = "$conversionRate_gbpusd  USD"
-                conversionFour = (conversionRate_gbpusd/conversionRate_cnyusd).toString() + "  CNY"
-                conversionFive = (conversionRate_gbpusd/conversionRate_jpyusd).toString() + "  JPY"
-                conversionSix = (conversionRate_gbpusd/conversionRate_krwusd).toString() + "  KRW"
-            }
+        buttonRates.text = selectedCurrency
 
-            "USD" -> {
-                conversionOne = (1/conversionRate_eurusd).toString() + "  EUR"
-                conversionTwo = (1/conversionRate_sekusd).toString() + "  SEK"
-                conversionThree = (1/conversionRate_gbpusd).toString() + "  GBP"
-                conversionFour = (1/conversionRate_cnyusd).toString() + "  CNY"
-                conversionFive = (1/conversionRate_jpyusd).toString() + "  JPY"
-                conversionSix = (1/conversionRate_krwusd).toString() + "  KRW"
-            }
+        //add listener to button to select currency
+        binding.ratesButton.setOnClickListener {
 
-            "CNY" -> {
-                conversionOne = (conversionRate_cnyusd/conversionRate_eurusd).toString() + "  EUR"
-                conversionTwo = (conversionRate_cnyusd/conversionRate_sekusd).toString() + "  SEK"
-                conversionThree = "$conversionRate_cnyusd  USD"
-                conversionFour = (conversionRate_cnyusd/conversionRate_gbpusd).toString() + "  GBP"
-                conversionFive = (conversionRate_cnyusd/conversionRate_jpyusd).toString() + "  JPY"
-                conversionSix = (conversionRate_cnyusd/conversionRate_krwusd).toString() + "  KRW"
-            }
-
-            "JPY" -> {
-                conversionOne = (conversionRate_jpyusd/conversionRate_sekusd).toString() + "  SEK"
-                conversionTwo = (conversionRate_jpyusd/conversionRate_gbpusd).toString() + "  GBP"
-                conversionThree= "$conversionRate_jpyusd  USD"
-                conversionFour= (conversionRate_jpyusd/conversionRate_cnyusd).toString() + "  CNY"
-                conversionFive= (conversionRate_jpyusd/conversionRate_eurusd).toString() + "  EUR"
-                conversionSix= (conversionRate_jpyusd/conversionRate_krwusd).toString() + "  KRW"
-            }
-
-            "KRW" -> {
-                conversionOne = (conversionRate_krwusd/conversionRate_sekusd).toString() + "  SEK"
-                conversionTwo = (conversionRate_krwusd/conversionRate_gbpusd).toString() + "  GBP"
-                conversionThree = "$conversionRate_krwusd  USD"
-                conversionFour = (conversionRate_krwusd/conversionRate_cnyusd).toString() + "  CNY"
-                conversionFive = (conversionRate_krwusd/conversionRate_jpyusd).toString() + "  JPY"
-                conversionSix = (conversionRate_krwusd/conversionRate_eurusd).toString() + "  EUR"
-            }
-            else -> return
+            val intent = Intent(this@ConversionRatesList, ListOfCurrencies::class.java)
+            intent.putExtra("where", "rates")
+            intent.putExtra("currencies", listOfCurrencies)
+            resultLauncherFromRatesList.launch(intent)
         }
     }
 
