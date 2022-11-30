@@ -204,7 +204,7 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    //adds localization fucntionality, which lets us retrieve the current location fo the device
+    //adds localization functionality, which lets us retrieve the current location fo the device
     private fun locationFunctionality(){
         //checks if location permissions are granted
         if(ActivityCompat.checkSelfPermission(this,android.Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
@@ -212,7 +212,6 @@ class MainActivity : AppCompatActivity() {
 
             //initializes the location manager
             val locationManager: LocationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
-
             if(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
                 //gets the last location
                 val loc: Task<Location> = fusedLocationProviderClient.getLastLocation()
@@ -220,17 +219,12 @@ class MainActivity : AppCompatActivity() {
                 loc.addOnSuccessListener { location ->
                     if (location != null) {
                         location?.let {
-                            Geocoder(this)
-                                .getAddress(
-                                    it.latitude,
-                                    it.longitude
-                                ) { address: android.location.Address? ->
+                            Geocoder(this).getAddress(it.latitude, it.longitude) {
+                                    address: android.location.Address? ->
                                     if (address != null) {
                                             var locale = address.locale
-
                                             fromCurrency = if (VERSION.SDK_INT >= 24) android.icu.text.NumberFormat.getCurrencyInstance(locale).currency.toString()
                                                             else java.text.NumberFormat.getCurrencyInstance(address.locale).currency.toString()
-
                                             binding.fromButton.text = fromCurrency
                                     }
                                 }
@@ -256,22 +250,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     @Suppress("DEPRECATION")
-    fun Geocoder.getAddress(
-        latitude: Double,
-        longitude: Double,
-        address: (android.location.Address?) -> Unit
-    ) {
-
+    fun Geocoder.getAddress(latitude: Double, longitude: Double, address: (android.location.Address?) -> Unit) {
         if (Build.VERSION.SDK_INT >= 33) {
             getFromLocation(latitude, longitude, 1) { address(it.firstOrNull()) }
             return
         }
-
-        try {
+        else {
             address(getFromLocation(latitude, longitude, 1)?.firstOrNull())
-        } catch(e: Exception) {
-            //will catch if there is an internet problem
-            address(null)
         }
     }
 }
